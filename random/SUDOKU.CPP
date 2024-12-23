@@ -1,19 +1,63 @@
 #include <iostream.h>
 #include <conio.h>
 #include <ctype.h>
+#include <math.h>
+
+int grid[9][9];
+
+int possible(int row, int column, int num) {
+	int bool = 1;
+	int x0, y0;
+	for (int i = 0; i < 9; i++) {
+		if (grid[row][i] == num) {
+			bool = 0;
+		}
+	}
+	for (i = 0; i < 9; i++) {
+		if (grid[i][column] == num) {
+			bool = 0;
+		}
+	}
+	x0 = (floor(column / 3)) * 3;
+	y0 = (floor(row / 3)) * 3;
+	for (i = 0; i < 3; i++) {
+		for (int j = 0; j < 3; j++) {
+			if (grid[y0 + i][x0 + j] == num) {
+				bool = 0;
+			}
+		}
+	}
+	return bool;
+}
+
+int solver() {
+	for (int row = 0; row < 9; row++) {
+		for (int column = 0; column < 9; column++) {
+			if (grid[row][column] == 0) {
+				for (int num = 1; num < 10; num++) {
+					if (possible(row, column, num)) {
+						grid[row][column] = num;
+						if (solver()) {
+							return 1;
+						}
+						grid[row][column] = 0;
+					}
+				}
+				return 0;
+			}
+		}
+	}
+}
 
 int main() {
 	clrscr();
 	int running = 1;
-	int solve = 0;
 	int try;
 	// grid
-	const size_x = 9, size_y = 9;
-	int num[size_x][size_y];
-	char grid[size_x][size_y];
-	for (int x = 0; x < size_x; x++) {
-		for (int y = 0; y < size_y; y++) {
-			num[x][y] = 0;
+
+	for (int x = 0; x < 9; x++) {
+		for (int y = 0; y < 9; y++) {
+			grid[x][y] = 0;
 		}
 	 }
 	char input;
@@ -21,30 +65,24 @@ int main() {
 	// loop
 	while (running) {
 		clrscr();
-		// convert int grid to char grid
-		for (int x = 0; x < size_x; x++) {
-			for (int y = 0; y < size_y; y++) {
-				if (num[x][y] == 0) {
-					grid[x][y] = ' ';
-				}
-				else {
-					grid[x][y] = num[x][y] + '0';
-				}
-			}
-		}
 		// draw grid
-		for (int z = 0; z < size_x * 2; z++) {
+		for (int z = 0; z < 9 * 2; z++) {
 			cout << " -";
 		}
 		cout << "\t\t ---- SUDOKU SOLVER ----" << endl;
-		for (x = 0; x < size_x; x++) {
+		for (x = 0; x < 9; x++) {
 			cout << "| ";
-			for (int y = 0; y < size_y; y++) {
+			for (int y = 0; y < 9; y++) {
 				if (p_x == x && p_y == y) {
 					cout << "#" << " | ";
 				}
 				else {
-					cout << grid[x][y] << " | ";
+					if (grid[x][y] == 0) {
+						cout << "  | ";
+					}
+					else {
+						cout << grid[x][y] << " | ";
+					}
 				}
 				if (y == 8 && x == 0) {
 					if (p_y == 9) {
@@ -65,7 +103,7 @@ int main() {
 			}
 			}
 			cout << endl;
-			for (int z = 0; z < size_x * 2; z++) {
+			for (int z = 0; z < 9 * 2; z++) {
 				cout << " -";
 			}
 			if (x == 1) {
@@ -80,7 +118,7 @@ int main() {
 		if (kbhit) {
 			input = tolower(getch());
 			if (int(input) >= 48 && int(input) <= 57) {
-				num[p_x][p_y] = input - '0';
+				grid[p_x][p_y] = input - '0';
 				continue;
 			}
 			switch (input) {
@@ -99,12 +137,12 @@ int main() {
 					break;
 				case ' ':
 					if (p_y == 9) {
-						solve = 1;
+						solver();
 					}
 					if(p_y == 10) {
-						for (int x = 0; x < size_x; x++) {
-							for (int y = 0; y < size_y; y++) {
-								num[x][y] = 0;
+						for (int x = 0; x < 9; x++) {
+							for (int y = 0; y < 9; y++) {
+								grid[x][y] = 0;
 							}
 						 }
 					}
@@ -112,33 +150,6 @@ int main() {
 				case 'q':
 					running = 0;
 					break;
-			}
-		}
-		// solving
-		while (solve) {
-			for (int check_x = 0; check_x < size_x; check_x++) {
-				for (int check_y = 0; check_y < size_y; check_y++) {
-					try = 1;
-					if (num[check_x][check_y] == 0) {
-						for (int row = 0; row < size_y; row++) {
-							if (num[check_x][check_y] == num[row][check_y]) {
-								try++;
-							}
-							else {
-								num[check_x][check_y] = try;
-							}
-						}
-						try = 1;
-						for (int column = 0; column < size_x; column++) {
-							if (num[check_x][check_y] == num[check_x][column]) {
-								try++;
-							}
-							else {
-								num[check_x][check_y] = try;
-							}
-						}
-					}
-				}
 			}
 		}
 	}
